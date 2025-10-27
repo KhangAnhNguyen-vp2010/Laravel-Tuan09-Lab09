@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Http\Requests\StoreArticleRequest;
 use Illuminate\Http\Request;
+use App\Models\Article;
 
 class ArticleController extends Controller
 {
@@ -13,17 +14,9 @@ class ArticleController extends Controller
      */
     public function index()
     {
-        // Tạm thời dùng mảng mô phỏng dữ liệu
-$articles = [
-['id' => 1, 'title' => 'Giới thiệu Laravel 12', 'body' => 'Nội
-
-dung A'],
-
-['id' => 2, 'title' => 'Blade Components', 'body' => 'Nội dung
-
-B'],
-];
-return view('articles.index', compact('articles'));
+        
+        $articles = Article::all();
+        return view('articles.index', compact('articles'));
     }
 
     /**
@@ -44,11 +37,16 @@ return view('articles.index', compact('articles'));
      */
     public function store(StoreArticleRequest $request)
     {
-        // Dữ liệu hợp lệ đã được validate
-        $validated = $request->validated();
-        // Tạm thời: giả lưu, thực tế sẽ lưu DB ở buổi sau
+        $data = $request->validated();
+        // Xử lý ảnh (nếu có)
+        if ($request->hasFile('image')) {
+            // Lưu vào disk 'public' (đường dẫn: storage/app/public/articles/...)
+            $path = $request->file('image')->store('articles', 'public');
+            $data['image_path'] = $path; // lưu đường dẫn tương đối
+        }
+        Article::create($data);
         return redirect()->route('articles.index')
-            ->with('success', 'Tạo bài viết thành công (demo).');
+        ->with('success', 'Tạo bài viết thành công');
     }
 
     /**
@@ -70,9 +68,8 @@ return view('articles.index', compact('articles'));
      */
     public function edit($id)
     {
-        $article = ['id' => $id, 'title' => 'Tiêu đề mẫu', 'body' => 'Nội
-dung mẫu'];
-return view('articles.edit', compact('article'));
+        $article = Article::findOrFail($id);
+        return view('articles.edit', compact('article'));
     }
 
     /**
@@ -84,11 +81,18 @@ return view('articles.edit', compact('article'));
      */
     public function update(StoreArticleRequest $request, $id)
     {
-        // Dữ liệu hợp lệ đã được validate
-        $validated = $request->validated();
-        // Tạm thời: giả lưu, thực tế sẽ lưu DB ở buổi sau
-        return redirect()->route('articles.index')
-            ->with('success', 'Tạo bài viết thành công (demo).');
+        $article = Article::findOrFail($id);
+        $data = $request->validated();
+        if ($request->hasFile('image')) {
+            // Xoá ảnh cũ (nếu có)
+            if (!empty($article->image_path) && Storage::disk('public')->exists($article->image_path)) {
+                Storage::disk('public')->delete($article->image_path);
+            }
+            $data['image_path'] = $request->file('image')->store('articles', 'public');
+        }
+        $article->update($data);
+        return redirect()->route('articles.index', $article)
+        ->with('success', 'Cập nhật bài viết thành công');
     }
 
     /**

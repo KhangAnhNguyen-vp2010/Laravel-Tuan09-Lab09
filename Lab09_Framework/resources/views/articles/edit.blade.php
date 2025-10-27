@@ -2,7 +2,7 @@
 @section('title','Sửa bài viết')
 @section('content')
 <h2>Sửa bài viết #{{ $article['id'] }}</h2>
-<form action="{{ route('articles.update',$article['id']) }}" method="post">
+<form action="{{ route('articles.update',$article['id']) }}" method="post" enctype="multipart/form-data">
 @csrf
 @method('PUT')
 <x-input name="title" label="Tiêu đề" :value="$article['title']" />
@@ -14,6 +14,9 @@ solid #e5e7eb;border-radius:6px">{{ old('body',$article['body'])
 @error('body')
 <div style="color:#991B1B;margin-top:4px">{{ $message }}</div>
 @enderror
+<label>Ảnh minh hoạ (tuỳ chọn)</label>
+<input type="file" name="image" accept=".jpg,.jpeg,.png">
+@error('image') <div style="color:#b91c1c">{{ $message }}</div> @enderror
 <button type="submit" style="margin-top:10px">Cập nhật</button>
 </form>
 @endsection
