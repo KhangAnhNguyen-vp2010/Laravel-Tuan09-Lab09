@@ -59,5 +59,15 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
         });
+
+        RateLimiter::for('login', function (Request $request) {
+            $identifier = $request->input('email') ?: $request->ip();
+
+            return Limit::perMinute(5)->by($identifier)->response(function () {
+                return response()->json([
+                    'message' => 'Bạn đã thử đăng nhập quá nhiều lần. Vui lòng thử lại sau 1 phút.',
+                ], 429);
+            });
+        });
     }
 }

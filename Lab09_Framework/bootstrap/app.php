@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\CheckAdmin;
+use Illuminate\Routing\Router;
+
 /*
 |--------------------------------------------------------------------------
 | Create The Application
@@ -40,6 +43,10 @@ $app->singleton(
     Illuminate\Contracts\Debug\ExceptionHandler::class,
     App\Exceptions\Handler::class
 );
+
+$app->afterResolving(Router::class, function (Router $router) {
+    $router->aliasMiddleware('admin', CheckAdmin::class);
+});
 
 /*
 |--------------------------------------------------------------------------

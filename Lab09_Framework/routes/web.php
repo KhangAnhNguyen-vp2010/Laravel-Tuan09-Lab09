@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\ArticleController;
 
 /*
@@ -22,16 +23,22 @@ Route::get('/', function () {
 Route::get('/articles/page/{page}', function ($page) {
 return "Trang bài viết số: " . (int)$page;
 })->whereNumber('page')->name('articles.page');
+
 // 2. Tham số tuỳ chọn + regex slug
 Route::get('/articles/slug/{slug?}', function ($slug = 'khong-co-slug') {
-return "Slug: " . $slug;
+    return "Slug: " . $slug;
 })->where('slug', '[a-z0-9-]+');
-// 3. Route group với prefix
-Route::prefix('admin')->group(function () {
-Route::get('/articles', fn() => 'Quản trị bài viết')
-->name('admin.articles.index');
 
+// 3. Route group với prefix
+Route::prefix('admin')->middleware('admin')->group(function () {
+    Route::get('/articles', fn() => 'Quản trị bài viết')
+        ->name('admin.articles.index');
 });
 
-
 Route::resource('articles', ArticleController::class);
+
+Route::post('/login-demo', function (Request $request) {
+    return response()->json([
+        'message' => 'Đăng nhập demo thành công',
+    ]);
+})->middleware('throttle:login');
