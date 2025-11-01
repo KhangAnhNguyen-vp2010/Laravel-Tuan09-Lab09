@@ -1,31 +1,48 @@
 <!DOCTYPE html>
-<html lang="vi">
-<head>
-<meta charset="utf-8">
-<title>@yield('title','Articles')</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial,
-sans-serif; }
-.container { max-width: 960px; margin: 24px auto; }
-.flash { padding: 10px; margin-bottom: 12px; background: #ECFDF5;
-color:#065F46; border-radius:8px; }
-nav a { margin-right: 8px; }
-table { border-collapse: collapse; width: 100%; }
-th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; }
-th { background: #f3f4f6; }
-</style>
-@stack('styles')
-</head>
-<body>
-@include('partials.nav')
-<div class="container">
-@if(session('success'))
-<div class="flash">{{ session('success') }}</div>
-@endif
-@yield('content')
-</div>
-@include('partials.footer')
-@stack('scripts')
-</body>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
+        <title>{{ config('app.name', 'Laravel') }}</title>
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
+
+        <!-- Scripts -->
+        <link rel="stylesheet" href="{{ mix('css/app.css') }}">
+        <script src="{{ mix('js/app.js') }}" defer></script>
+    </head>
+    <body class="font-sans antialiased">
+        <div class="min-h-screen bg-gray-100">
+            @include('layouts.navigation')
+
+            <!-- Page Heading -->
+            @isset($header)
+                <header class="bg-white shadow">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </header>
+            @else
+                @hasSection('header')
+                    <header class="bg-white shadow">
+                        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                            @yield('header')
+                        </div>
+                    </header>
+                @endif
+            @endisset
+
+            <!-- Page Content -->
+            <main>
+                @isset($slot)
+                    {{ $slot }}
+                @else
+                    @yield('content')
+                @endisset
+            </main>
+        </div>
+    </body>
 </html>

@@ -1,12 +1,19 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Http\Requests\StoreArticleRequest;
-use Illuminate\Http\Request;
 use App\Models\Article;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ArticleController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth')->except(['index', 'show']);
+    }
+
     /**
      * Display a listing of the resource.
      *

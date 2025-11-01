@@ -1,10 +1,3 @@
-@props(['name','label'=>null,'type'=>'text','value'=>''])
-<label style="display:block;margin:8px 0 4px">{{ $label ?? ucfirst($name) }}</label>
-<input type="{{ $type }}" name="{{ $name }}" value="{{ old($name, $value) }}"
+@props(['disabled' => false])
 
-style="width:100%;padding:8px;border:1px solid #e5e7eb;border-
-radius:6px">
-
-@error($name)
-<div style="color:#991B1B;margin-top:4px">{{ $message }}</div>
-@enderror
+<input {{ $disabled ? 'disabled' : '' }} {!! $attributes->merge(['class' => 'rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50']) !!}>
