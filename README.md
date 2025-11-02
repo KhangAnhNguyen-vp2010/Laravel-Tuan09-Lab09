@@ -4,7 +4,7 @@
 
 -Clone project về gõ theo các câu lệnh:
 
-cd Lab08_Framework
+cd Lab09_Framework
 
 composer install
 
