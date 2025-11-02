@@ -21,8 +21,8 @@ class ArticleController extends Controller
      */
     public function index()
     {
-        
-        $articles = Article::all();
+        $articles = Article::with('user')->latest()->get();
+
         return view('articles.index', compact('articles'));
     }
 
@@ -33,6 +33,8 @@ class ArticleController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Article::class);
+
         return view('articles.create');
     }
 
@@ -44,16 +46,21 @@ class ArticleController extends Controller
      */
     public function store(StoreArticleRequest $request)
     {
+        $this->authorize('create', Article::class);
+
         $data = $request->validated();
-        // Xử lý ảnh (nếu có)
+
         if ($request->hasFile('image')) {
-            // Lưu vào disk 'public' (đường dẫn: storage/app/public/articles/...)
             $path = $request->file('image')->store('articles', 'public');
-            $data['image_path'] = $path; // lưu đường dẫn tương đối
+            $data['image_path'] = $path;
         }
+
+        $data['user_id'] = $request->user()->id;
+
         Article::create($data);
+
         return redirect()->route('articles.index')
-        ->with('success', 'Tạo bài viết thành công');
+            ->with('success', 'Tạo bài viết thành công');
     }
 
     /**
@@ -62,9 +69,9 @@ class ArticleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Article $article)
     {
-        return "Xem chi tiết bài viết ID: " . (int)$id;
+        return view('articles.show', compact('article'));
     }
 
     /**
@@ -73,9 +80,10 @@ class ArticleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Article $article)
     {
-        $article = Article::findOrFail($id);
+        $this->authorize('update', $article);
+
         return view('articles.edit', compact('article'));
     }
 
@@ -86,20 +94,26 @@ class ArticleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(StoreArticleRequest $request, $id)
+    public function update(StoreArticleRequest $request, Article $article)
     {
-        $article = Article::findOrFail($id);
+        $this->authorize('update', $article);
+
         $data = $request->validated();
+
         if ($request->hasFile('image')) {
-            // Xoá ảnh cũ (nếu có)
             if (!empty($article->image_path) && Storage::disk('public')->exists($article->image_path)) {
                 Storage::disk('public')->delete($article->image_path);
             }
+
             $data['image_path'] = $request->file('image')->store('articles', 'public');
         }
+
+        unset($data['user_id']);
+
         $article->update($data);
-        return redirect()->route('articles.index', $article)
-        ->with('success', 'Cập nhật bài viết thành công');
+
+        return redirect()->route('articles.index')
+            ->with('success', 'Cập nhật bài viết thành công');
     }
 
     /**
@@ -108,9 +122,17 @@ class ArticleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Article $article)
     {
+        $this->authorize('delete', $article);
+
+        if (!empty($article->image_path) && Storage::disk('public')->exists($article->image_path)) {
+            Storage::disk('public')->delete($article->image_path);
+        }
+
+        $article->delete();
+
         return redirect()->route('articles.index')
-->with('success', "Đã xoá bài viết #$id (demo).");
+            ->with('success', 'Đã xoá bài viết thành công.');
     }
 }

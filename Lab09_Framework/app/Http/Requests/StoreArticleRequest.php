@@ -1,8 +1,10 @@
 <?php
 
 namespace App\Http\Requests;
+
 use App\Rules\NoForbiddenWords;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreArticleRequest extends FormRequest
 {
@@ -13,7 +15,7 @@ class StoreArticleRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return auth()->check();
     }
 
     /**
@@ -24,7 +26,13 @@ class StoreArticleRequest extends FormRequest
     public function rules()
     {
         return [
-            'title' => ['required', 'string', 'max:255', 'unique:articles,title', new NoForbiddenWords],
+            'title' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('articles', 'title')->ignore(optional($this->route('article'))->id),
+                new NoForbiddenWords,
+            ],
             'body' => ['required', 'string', 'min:10'],
             // ảnh: tùy chọn
             'image' => ['sometimes', 'nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],

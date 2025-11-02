@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ProfileController;
+use App\Models\Article;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,7 +22,27 @@ Route::get('/', function () {
 
 Route::resource('articles', ArticleController::class)->only(['index', 'show']);
 
-Route::resource('articles', ArticleController::class)->except(['index', 'show'])->middleware(['auth']);
+Route::middleware('auth')->group(function () {
+    Route::get('/articles/create', [ArticleController::class, 'create'])
+        ->name('articles.create')
+        ->middleware('can:create,' . Article::class);
+
+    Route::post('/articles', [ArticleController::class, 'store'])
+        ->name('articles.store')
+        ->middleware('can:create,' . Article::class);
+
+    Route::get('/articles/{article}/edit', [ArticleController::class, 'edit'])
+        ->name('articles.edit')
+        ->middleware('can:update,article');
+
+    Route::put('/articles/{article}', [ArticleController::class, 'update'])
+        ->name('articles.update')
+        ->middleware('can:update,article');
+
+    Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])
+        ->name('articles.destroy')
+        ->middleware('can:delete,article');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
