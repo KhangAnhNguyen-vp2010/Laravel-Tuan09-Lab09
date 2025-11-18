@@ -16,7 +16,7 @@
                         {{ __('Articles') }}
                     </x-nav-link>
 
-                    @auth
+                    @can('admin')
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                             {{ __('Dashboard') }}
                         </x-nav-link>
@@ -24,7 +24,7 @@
                         <x-nav-link :href="route('articles.create')" :active="request()->routeIs('articles.create')">
                             {{ __('Create Article') }}
                         </x-nav-link>
-                    @endauth
+                    @endcan
                 </div>
             </div>
 
@@ -92,7 +92,7 @@
                 {{ __('Articles') }}
             </x-responsive-nav-link>
 
-            @auth
+            @can('admin')
                 <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                     {{ __('Dashboard') }}
                 </x-responsive-nav-link>
@@ -100,7 +100,7 @@
                 <x-responsive-nav-link :href="route('articles.create')" :active="request()->routeIs('articles.create')">
                     {{ __('Create Article') }}
                 </x-responsive-nav-link>
-            @endauth
+            @endcan
         </div>
 
         <!-- Responsive Settings Options -->
