@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\CheckAdmin;
+use App\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Router;
 
 /*
@@ -46,6 +47,12 @@ $app->singleton(
 
 $app->afterResolving(Router::class, function (Router $router) {
     $router->aliasMiddleware('admin', CheckAdmin::class);
+});
+
+$app->afterResolving(VerifyCsrfToken::class, function (VerifyCsrfToken $middleware) {
+    $middleware->addExceptUris([
+        '/webhooks/demo-provider',
+    ]);
 });
 
 /*

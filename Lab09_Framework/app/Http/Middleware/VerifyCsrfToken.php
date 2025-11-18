@@ -14,4 +14,15 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         //
     ];
+
+    /**
+     * Append URIs that should bypass CSRF verification at runtime.
+     *
+     * @param  array<int, string>  $uris
+     * @return void
+     */
+    public function addExceptUris(array $uris): void
+    {
+        $this->except = array_values(array_unique(array_merge($this->except, $uris)));
+    }
 }
